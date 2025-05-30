@@ -2,9 +2,8 @@ ultralytics==8.1.25       # versi stabil YOLO
 pillow>=9.0.0             # pastikan mendukung gambar
 numpy<2.0                 # sesuai dengan torch dan ultralytics
 roboflow                 # untuk load dataset dari roboflow
-yolo                     # bisa dihapus kalau tidak dipakai
+# yolo                   # bisa dihapus kalau tidak dipakai
 vidgear[sync]           # untuk input video stabil
 streamlit               # versi terbaru
 opencv-python           # jangan pakai headless kalau butuh imshow, GUI, dsb
 torch>=1.13              # pastikan sesuai dengan CUDA/CPU device
-libgl1
