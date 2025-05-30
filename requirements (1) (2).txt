@@ -1,9 +1,0 @@
-ultralytics
-streamlit
-pillow
-numpy<2
-opencv-python-headless
-matplotlib
-torch
-roboflow
-vidgear
