@@ -52,12 +52,12 @@ if option == "Image":
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
     if uploaded_file:
         image = Image.open(uploaded_file).convert("RGB")
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
         image_np = np.array(image)
 
         results = model.predict(image_np, imgsz=640)
         result_img = results[0].plot()
-        st.image(result_img, caption="Detected Acne", use_column_width=True)
+        st.image(result_img, caption="Detected Acne", use_container_width=True)
 
         # Deteksi kelas jerawat yang muncul
         detected_classes = [results[0].names[int(cls)] for cls in results[0].boxes.cls.cpu().numpy()]
