@@ -1,0 +1,9 @@
+pillow
+numpy<2
+roboflow
+yolo
+vidgear
+streamlit
+opencv-python-headless
+torch
+ultralytics
