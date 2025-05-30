@@ -1,4 +1,4 @@
-import YOLO
+from YOLO import YourClassOrFunction
 import streamlit as st
 from collections import Counter
 from PIL import Image, ImageDraw, ImageFont
