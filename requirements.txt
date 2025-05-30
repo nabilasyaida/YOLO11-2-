@@ -5,5 +5,5 @@ roboflow
 yolo
 vidgear
 streamlit
-opencv-python-headless
+opencv-python
 torch
