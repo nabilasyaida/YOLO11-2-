@@ -1,3 +1,4 @@
+ultralytics
 pillow
 numpy<2
 roboflow
@@ -6,4 +7,3 @@ vidgear
 streamlit
 opencv-python-headless
 torch
-ultralytics
