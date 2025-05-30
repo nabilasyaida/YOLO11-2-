@@ -1,4 +1,4 @@
-from YOLO import YourClassOrFunction
+from ultralytics import YOLO
 import streamlit as st
 from collections import Counter
 from PIL import Image, ImageDraw, ImageFont
