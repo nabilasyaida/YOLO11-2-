@@ -7,3 +7,4 @@ vidgear[sync]           # untuk input video stabil
 streamlit               # versi terbaru
 opencv-python           # jangan pakai headless kalau butuh imshow, GUI, dsb
 torch>=1.13              # pastikan sesuai dengan CUDA/CPU device
+libgl1
