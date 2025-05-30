@@ -1,69 +1,58 @@
 import streamlit as st
-from ultralytics import YOLO
-from PIL import Image
-import numpy as np
 import cv2
+import numpy as np
+from PIL import Image
+from ultralytics import YOLO
 import tempfile
-import base64
 import os
 
-# Set background
-def set_background(image_file):
-    with open(image_file, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode()
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/png;base64,{encoded}");
-            background-size: cover;
-            background-position: center;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# Load background
+def set_bg(png_file):
+    with open(png_file, "rb") as f:
+        bg_data = f.read()
+    bg_base64 = base64.b64encode(bg_data).decode()
+    page_bg = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{bg_base64}");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }}
+    </style>
+    """
+    st.markdown(page_bg, unsafe_allow_html=True)
 
-# Load model
-model = YOLO("best.pt")  # pastikan model kamu ada di folder ini
+import base64
+set_bg("background/Pastel Pink Holographic Gradient Mouse Pad Background (2).png")
 
-# Set holographic background
-set_background("Pastel Pink Holographic Gradient Mouse Pad Background.png")
+st.title("💖 Acne Detection with YOLOv11")
+st.write("Upload an image or video to detect acne types.")
 
-# Title
-st.markdown("<h1 style='text-align: center; color: white;'>💖 Acne Detection Web App</h1>", unsafe_allow_html=True)
+# Load YOLO model
+model = YOLO("model/best.pt")
 
-# Sidebar
-mode = st.sidebar.radio("Choose input type:", ["Image", "Video"])
+# Input method
+option = st.radio("Choose input type:", ("Image", "Video"))
 
-if mode == "Image":
-    img_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
-    if img_file:
-        img = Image.open(img_file).convert("RGB")
-        st.image(img, caption="Uploaded Image", use_column_width=True)
+if option == "Image":
+    uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+    if uploaded_image is not None:
+        image = Image.open(uploaded_image).convert("RGB")
+        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        # Run detection
-        results = model.predict(img)
-        res_plotted = results[0].plot()
+        with st.spinner("Detecting..."):
+            results = model.predict(np.array(image), imgsz=640)
+            res_plotted = results[0].plot()
+            st.image(res_plotted, caption="Detection Result", use_column_width=True)
 
-        st.image(res_plotted, caption="Detected Acne", use_column_width=True)
-
-elif mode == "Video":
-    vid_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi"])
-    if vid_file:
+elif option == "Video":
+    uploaded_video = st.file_uploader("Upload a video", type=["mp4", "avi", "mov"])
+    if uploaded_video is not None:
         tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(vid_file.read())
+        tfile.write(uploaded_video.read())
+
         cap = cv2.VideoCapture(tfile.name)
         stframe = st.empty()
 
         while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            results = model.predict(frame)
-            annotated = results[0].plot()
-            stframe.image(annotated, channels="BGR", use_column_width=True)
-
-        cap.release()
-        os.remove(tfile.name)
