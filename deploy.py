@@ -14,7 +14,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-image: url("assets/Hologram.png");
+        background-image: url("Hologram.png");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
