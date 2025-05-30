@@ -1,57 +1,59 @@
 import streamlit as st
+from ultralytics import YOLO
 from PIL import Image
+import numpy as np
 import cv2
 import tempfile
+import base64
 import os
-from ultralytics import YOLO
-import numpy as np
 
-# Set background image
-def set_background(png_file):
-    with open(png_file, "rb") as file:
-        bg_data = file.read()
-    bg_base64 = base64.b64encode(bg_data).decode()
-    bg_style = f"""
+# Set background
+def set_background(image_file):
+    with open(image_file, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+    st.markdown(
+        f"""
         <style>
         .stApp {{
-            background-image: url("data:image/png;base64,{bg_base64}");
+            background-image: url("data:image/png;base64,{encoded}");
             background-size: cover;
+            background-position: center;
         }}
         </style>
-    """
-    st.markdown(bg_style, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
-# Load background
-import base64
+# Load model
+model = YOLO("best.pt")  # pastikan model kamu ada di folder ini
+
+# Set holographic background
 set_background("Pastel Pink Holographic Gradient Mouse Pad Background.png")
 
-# Load YOLOv11 model
-model = YOLO("best.pt")  # ganti dengan path ke model kamu
-
 # Title
-st.title("💖 Acne Detection Web App")
+st.markdown("<h1 style='text-align: center; color: white;'>💖 Acne Detection Web App</h1>", unsafe_allow_html=True)
 
-# Sidebar for image/video input
-option = st.sidebar.selectbox("Choose Input Type", ["Image", "Video"])
+# Sidebar
+mode = st.sidebar.radio("Choose input type:", ["Image", "Video"])
 
-if option == "Image":
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file).convert("RGB")
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+if mode == "Image":
+    img_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+    if img_file:
+        img = Image.open(img_file).convert("RGB")
+        st.image(img, caption="Uploaded Image", use_column_width=True)
 
-        # YOLO prediction
-        results = model.predict(image)
-        annotated = results[0].plot()  # get annotated image
-        st.image(annotated, caption="Detected Acne", use_column_width=True)
+        # Run detection
+        results = model.predict(img)
+        res_plotted = results[0].plot()
 
-elif option == "Video":
-    uploaded_video = st.file_uploader("Upload a video", type=["mp4", "avi", "mov"])
-    if uploaded_video is not None:
+        st.image(res_plotted, caption="Detected Acne", use_column_width=True)
+
+elif mode == "Video":
+    vid_file = st.file_uploader("Upload a video", type=["mp4", "mov", "avi"])
+    if vid_file:
         tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(uploaded_video.read())
+        tfile.write(vid_file.read())
         cap = cv2.VideoCapture(tfile.name)
-
         stframe = st.empty()
 
         while cap.isOpened():
@@ -60,9 +62,8 @@ elif option == "Video":
                 break
 
             results = model.predict(frame)
-            annotated_frame = results[0].plot()
-
-            stframe.image(annotated_frame, channels="BGR")
+            annotated = results[0].plot()
+            stframe.image(annotated, channels="BGR", use_column_width=True)
 
         cap.release()
         os.remove(tfile.name)
