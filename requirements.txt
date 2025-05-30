@@ -1,8 +1,9 @@
-ultralytics==8.1.25
-pillow>=9.0.0
-numpy<2.0
+pillow
+numpy<2
 roboflow
-vidgear[sync]
+yolo
+vidgear
 streamlit
-opencv-python
-torch>=1.13
+opencv-python-headless
+torch
+ultralytics
