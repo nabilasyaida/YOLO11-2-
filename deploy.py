@@ -56,3 +56,12 @@ elif option == "Video":
         stframe = st.empty()
 
         while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            results = model.predict(frame, imgsz=640)
+            result_frame = results[0].plot()
+            stframe.image(result_frame, channels="BGR", use_column_width=True)
+
+        cap.release()
+        os.unlink(tfile.name)
