@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 5
+names: ['blackhead', 'nodule', 'papule', 'pustule', 'whitehead']
+
+roboflow:
+  workspace: nabila-syaida-ramdani-re1zj
+  project: acnee-iga6p
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/nabila-syaida-ramdani-re1zj/acnee-iga6p/dataset/1
