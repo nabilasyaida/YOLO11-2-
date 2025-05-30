@@ -13,7 +13,7 @@ if not os.path.exists(model_path):
     st.error("Model 'best.pt' tidak ditemukan. Silakan unggah model.")
     st.stop()
 else:
-    model = YOLO(model_path)
+    model = YOLO("best.pt")
 
 # Upload gambar
 uploaded_file = st.file_uploader("Unggah gambar wajah dengan jerawat", type=["jpg", "jpeg", "png"])
