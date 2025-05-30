@@ -7,7 +7,7 @@ import os
 from ultralytics import YOLO
 
 # Load model
-model = YOLO("yolov11-best.pt")  # Ganti dengan path modelmu
+model = YOLO("best.pt")  # Ganti dengan path modelmu
 
 # Background styling
 st.markdown(
