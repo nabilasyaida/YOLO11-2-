@@ -24,7 +24,7 @@ def set_bg(png_file):
     st.markdown(page_bg, unsafe_allow_html=True)
 
 import base64
-set_bg("background/Pastel Pink Holographic Gradient Mouse Pad Background (2).png")
+set_bg("background/Hologram.png")
 
 st.title("💖 Acne Detection with YOLOv11")
 st.write("Upload an image or video to detect acne types.")
