@@ -6,7 +6,7 @@ import tempfile
 import os
 from ultralytics import YOLO
 
-# Load model
+# Load model YOLO
 model = YOLO("best.pt")  # Ganti dengan path model kamu
 
 # Background styling
@@ -25,11 +25,12 @@ st.markdown(
 )
 
 st.title("Acne Detection Web App 💖")
-st.write("Upload an image or video to detect acne types!")
+st.write("Upload an image, video, or use your webcam to detect acne types!")
 
-option = st.radio("Choose input type:", ("Image", "Video"))
+# Input options
+option = st.radio("Choose input type:", ("Image", "Video", "Webcam"))
 
-# Dictionary rekomendasi skincare
+# Rekomendasi skincare
 skincare_recommendations = {
     "whitehead": "Gunakan pembersih berbasis salicylic acid dan hindari produk komedogenik.",
     "blackhead": "Eksfoliasi ringan 2-3 kali seminggu dengan BHA seperti salicylic acid.",
@@ -48,6 +49,15 @@ def display_recommendations(names_detected):
             st.markdown(f"**{cls.capitalize()}**: {rec}")
             shown.add(cls)
 
+def classify_acne(count):
+    if count > 10:
+        return "Severe"
+    elif count == 10:
+        return "Mild"
+    else:
+        return "Normal"
+
+# ====== IMAGE HANDLING ======
 if option == "Image":
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
     if uploaded_file:
@@ -59,6 +69,77 @@ if option == "Image":
         result_img = results[0].plot()
         st.image(result_img, caption="Detected Acne", use_container_width=True)
 
-        # Deteksi kelas jerawat yang muncul
         detected_classes = [results[0].names[int(cls)] for cls in results[0].boxes.cls.cpu().numpy()]
         display_recommendations(detected_classes)
+
+        acne_count = len(detected_classes)
+        st.subheader("📊 Acne Count and Severity Classification")
+        st.write(f"Jumlah jerawat terdeteksi: **{acne_count}**")
+        st.markdown(f"**Klasifikasi Tingkat Jerawat:** `{classify_acne(acne_count)}`")
+
+# ====== VIDEO HANDLING ======
+elif option == "Video":
+    uploaded_video = st.file_uploader("Upload a video", type=["mp4", "mov", "avi"])
+    if uploaded_video:
+        tfile = tempfile.NamedTemporaryFile(delete=False)
+        tfile.write(uploaded_video.read())
+        cap = cv2.VideoCapture(tfile.name)
+
+        stframe = st.empty()
+        detected_classes_all = []
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            results = model.predict(frame, imgsz=640)
+            result_frame = results[0].plot()
+
+            stframe.image(result_frame, channels="BGR", use_container_width=True)
+
+            detected_classes_frame = [results[0].names[int(cls)] for cls in results[0].boxes.cls.cpu().numpy()]
+            detected_classes_all.extend(detected_classes_frame)
+
+        cap.release()
+        os.remove(tfile.name)
+
+        acne_count = len(detected_classes_all)
+        st.subheader("📊 Acne Count and Severity Classification")
+        st.write(f"Total jerawat terdeteksi di video: **{acne_count}**")
+        st.markdown(f"**Klasifikasi Tingkat Jerawat:** `{classify_acne(acne_count)}`")
+        display_recommendations(detected_classes_all)
+
+# ====== WEBCAM HANDLING ======
+elif option == "Webcam":
+    st.write("📷 Turn on your webcam for live acne detection")
+    run = st.checkbox('Start Webcam')
+
+    FRAME_WINDOW = st.image([])
+    detected_classes_all = []
+
+    cap = cv2.VideoCapture(0)  # Webcam default
+
+    while run:
+        ret, frame = cap.read()
+        if not ret:
+            st.write("Gagal mengakses webcam")
+            break
+
+        results = model.predict(frame, imgsz=640)
+        result_frame = results[0].plot()
+
+        FRAME_WINDOW.image(result_frame, channels="BGR", use_container_width=True)
+
+        detected_classes_frame = [results[0].names[int(cls)] for cls in results[0].boxes.cls.cpu().numpy()]
+        detected_classes_all.extend(detected_classes_frame)
+
+    else:
+        cap.release()
+        cv2.destroyAllWindows()
+
+        st.subheader("📊 Hasil Deteksi Webcam")
+        acne_count = len(detected_classes_all)
+        st.write(f"Jumlah jerawat terdeteksi selama sesi: **{acne_count}**")
+        st.markdown(f"**Klasifikasi Tingkat Jerawat:** `{classify_acne(acne_count)}`")
+        display_recommendations(detected_classes_all)
